@@ -2,8 +2,14 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AuthState } from "../../hooks/hooks";
 
 const initialState: AuthState = {
-  status: "checking", // 'checking' | 'authenticated' | 'not-authenticated'
-  user: {},
+  status: "authenticated", // 'checking' | 'authenticated' | 'not-authenticated'
+  user: {
+    uid: "ABC123",
+    cedula: "105323121",
+    name: "Gian Melendez",
+    email: "gmele@co.co",
+    role: "admin",
+  },
   errorMessage: undefined,
 };
 
@@ -13,17 +19,17 @@ export const authSlice = createSlice({
   reducers: {
     onChecking: (state /* action */) => {
       state.status = "checking";
-      state.user = {};
+      state.user = undefined;
       state.errorMessage = undefined;
     },
-    onLogin: (state, { payload }: { payload: AuthState}) => {
+    onLogin: (state, { payload }: { payload: AuthState }) => {
       state.status = "authenticated";
       state.user = payload.user;
       state.errorMessage = undefined;
     },
-    onLogout: (state, { payload }: { payload: AuthState}) => {
+    onLogout: (state, { payload }: { payload: AuthState }) => {
       state.status = "not-authenticated";
-      state.user = {};
+      state.user = undefined;
       state.errorMessage = payload?.errorMessage;
     },
     clearErrorMessages: (state /* action */) => {

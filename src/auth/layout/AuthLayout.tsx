@@ -1,14 +1,13 @@
-import { Grid2, Typography } from "@mui/material";
+import { Grid2 } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { ElementType, ReactNode } from "react";
 import "../styles/index.css";
 
 interface Props {
   children: ReactNode;
-  title?: string;
 }
 
-export const AuthLayout = ({ children, title = "" }: Props) => {
+export const AuthLayout = ({ children }: Props) => {
   return (
     <Grid2
       container
@@ -34,14 +33,11 @@ export const AuthLayout = ({ children, title = "" }: Props) => {
           borderRadius: 2,
         }}
       >
-        <Typography variant="h5" sx={{ mb: 1 }}>
-          {title}
           <img
             className="logo"
             src="https://suliquido.thinktic.co/wp-content/uploads/2024/01/logo-SU-LIQUIDO-SAS-1-e1708029386257.png"
             alt=""
           ></img>
-        </Typography>
         {children}
         {/* </> */}
       </Grid2>
