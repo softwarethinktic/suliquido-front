@@ -3,7 +3,7 @@ import { LocalShippingOutlined, Description } from "@mui/icons-material";
 import { FletesLayout } from "../layout/FletesLayout";
 import "../styles/index.css";
 import { grey } from "@mui/material/colors";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useCallback } from "react";
 
 const ButtonStyled = styled(Button)<ButtonProps>(({ theme }) => ({
@@ -19,21 +19,28 @@ const ButtonStyled = styled(Button)<ButtonProps>(({ theme }) => ({
 export const HomePage = () => {
   const navigate = useNavigate();
 
-
   const goToLiquidacion = useCallback(() => {
     navigate("/home/liquidacion");
   }, []);
 
-  const goToGenerarEstadoCuenta = useCallback(() => { 
+  const goToGenerarEstadoCuenta = useCallback(() => {
     navigate("/home/generar-estado-cuenta");
   }, []);
   return (
     <FletesLayout>
       <Box
         width="100%"
-        height="100%"
-        justifyContent="flex-start"
         display="flex"
+        justifyContent="center"
+        sx={{
+          height: {
+            sm: "100%",
+            xs: "70%",
+          },
+          marginBottom: {
+            xs: "20%",
+          },
+        }}
         flexDirection="column"
         alignItems="center"
       >

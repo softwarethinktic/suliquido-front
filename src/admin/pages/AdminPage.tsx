@@ -23,16 +23,24 @@ export const AdminPage: FC = () => {
     navigate("./register-user");
   }, []);
 
-//   const goToUserList = useCallback(() => {
-//     navigate("/user-list");
-//   }, []);
+  //   const goToUserList = useCallback(() => {
+  //     navigate("/user-list");
+  //   }, []);
 
   return (
     <FletesLayout>
       <Box
         width="100%"
-        height="100%"
-        justifyContent="flex-start"
+        justifyContent="center"
+        sx={{
+          height: {
+            sm: "100%",
+            xs: "70%",
+          },
+          marginBottom: {
+            xs: "20%",
+          },
+        }}
         display="flex"
         flexDirection="column"
         alignItems="center"

@@ -8,7 +8,7 @@ const initialState: AuthState = {
     cedula: "105323121",
     name: "Gian Melendez",
     email: "gmele@co.co",
-    role: "admin",
+    role: "user",
   },
   errorMessage: undefined,
 };

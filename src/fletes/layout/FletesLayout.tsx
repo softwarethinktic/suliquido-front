@@ -4,18 +4,18 @@ import { grey } from "@mui/material/colors";
 import { ElementType, ReactNode, useCallback } from "react";
 import Breadcrumbs from "../components/Breadcrumbs";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../hooks/useAuthStore";
 
 interface Props {
   children: ReactNode;
+  minHeight?: string;
 }
 
-export const FletesLayout = ({ children }: Props) => {
-
+export const FletesLayout = ({ children, minHeight = "100vh" }: Props) => {
+  const {startLogout} = useAuthStore();
   const navigate = useNavigate();
 
-
   const goToHome = useCallback(() => {
-    
     navigate("/");
   }, []);
 
@@ -29,8 +29,8 @@ export const FletesLayout = ({ children }: Props) => {
       bgcolor={grey[100]}
       justifyContent="center"
       sx={{
-        minHeight: "100vh",
         width: { sm: "auto", xs: "100vw" },
+        height: { sm: "100vh", xs: minHeight },
         paddingLeft: { sm: 4, xs: 0 },
         paddingRight: { sm: 4, xs: 0 },
         paddingBottom: { sm: 4, xs: 0 },
@@ -40,13 +40,13 @@ export const FletesLayout = ({ children }: Props) => {
         component={"div" as ElementType}
         xs={3}
         sx={{
-          width: { sm: "auto", xs: "100%" },
-          minHeight: { sm: "auto", xs: "100vh" },
+          width: { sm: "60vh", xs: "100%" },
+          minHeight: { sm: "60vh", xs: minHeight },
           boxShadow: { sm: "0px 5px 5px rgba(0, 0, 0, 0.2)", xs: "none" },
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "flex-start",
+          justifyContent: {sm : "center", xs: "flex-start"},
           backgroundColor: "white",
           padding: 4,
           borderRadius: 2,
@@ -65,7 +65,7 @@ export const FletesLayout = ({ children }: Props) => {
             width="150"
             alt=""
             onClick={goToHome}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: "pointer" }}
           />
 
           <Box display="flex" flexDirection="row" alignItems="center">
@@ -75,13 +75,12 @@ export const FletesLayout = ({ children }: Props) => {
             <Typography sx={{ marginBottom: 0 }} variant="body2" gutterBottom>
               Usuario
             </Typography>
-            <IconButton /*onClick={onLogOut}*/ color="error">
+            <IconButton onClick={startLogout} color="error">
               <LogoutOutlined />
             </IconButton>
           </Box>
         </Grid2>
         <Divider orientation="horizontal" flexItem />
-
         <Breadcrumbs />
 
         {children}

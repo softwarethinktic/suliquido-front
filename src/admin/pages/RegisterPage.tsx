@@ -1,10 +1,4 @@
-import {
-  Button,
-  Container,
-  Box,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Button, Container, Box, TextField, Typography } from "@mui/material";
 import { FC } from "react";
 // import { blue, grey } from "@mui/material/colors";
 import { Formik } from "formik";
@@ -23,7 +17,6 @@ const initialValues: RegisterFormValues = {
   password: "",
   name: "",
 };
-
 
 export const RegisterPage: FC = () => {
   const onSubmit = (values: RegisterFormValues) => {
@@ -67,7 +60,9 @@ export const RegisterPage: FC = () => {
                   value={values.documentNumber}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={touched.documentNumber && Boolean(errors.documentNumber)}
+                  error={
+                    touched.documentNumber && Boolean(errors.documentNumber)
+                  }
                   helperText={touched.documentNumber && errors.documentNumber}
                 />
                 <TextField

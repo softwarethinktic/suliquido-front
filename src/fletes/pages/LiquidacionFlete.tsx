@@ -14,7 +14,7 @@ const options = [
 
 export const LiquidacionFlete: FC = () => {
   return (
-    <FletesLayout>
+    <FletesLayout minHeight="130vh">
       <Grid2
         gap={3}
         container
