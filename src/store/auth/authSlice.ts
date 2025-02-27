@@ -2,15 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AuthState } from "../../hooks/hooks";
 
 const initialState: AuthState = {
-  status: "authenticated", // 'checking' | 'authenticated' | 'not-authenticated'
-  user: {
-    uid: "ABC123",
-    cedula: "105323121",
-    name: "Gian Melendez",
-    email: "gmele@co.co",
-    role: "user",
-  },
-  errorMessage: undefined,
+  status: "checking", // 'checking' | 'authenticated' | 'not-authenticated'
 };
 
 export const authSlice = createSlice({

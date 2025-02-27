@@ -1,9 +1,10 @@
-import { FC, useState } from "react";
+import { FC, useCallback, useState, useEffect } from "react";
 import { FletesLayout } from "../layout/FletesLayout";
 import {
   Autocomplete,
   Box,
   Button,
+  CircularProgress,
   createFilterOptions,
   Divider,
   Grid2,
@@ -13,18 +14,122 @@ import {
 import { green, grey } from "@mui/material/colors";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Download, Visibility } from "@mui/icons-material";
+import { Track, useMask } from "@react-input/mask";
+import { useFormik } from "formik";
+import { Moment } from "moment";
+import * as Yup from "yup";
+// import { Document, Page, pdfjs } from "react-pdf";
+
 import { Value } from "../../interfaces/fletes.interface";
+import suliquidoApi from "../../api/suliquidoApi";
+// import "./Document.css";
+// import "react-pdf/dist/Page/AnnotationLayer.css";
+// import "react-pdf/dist/Page/TextLayer.css";
+
+// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+//   "pdfjs-dist/build/pdf.worker.min.mjs",
+//   import.meta.url
+// ).toString();
 
 const filter = createFilterOptions<Value>();
+interface EstadoCuentaValues {
+  placas: Value[];
+  fechaInicial: Moment | null;
+  fechaFinal: Moment | null;
+}
 
-
+const initialValues: EstadoCuentaValues = {
+  placas: [],
+  fechaInicial: null,
+  fechaFinal: null,
+};
 
 export const GenerarEstadoCuenta: FC = () => {
-  const [value, setValue] = useState<Value[]>([]);
-  const isLoading = true;
+  const track: Track = ({ data }) => {
+    return data?.toUpperCase();
+  };
+  const inputRef = useMask({
+    mask: "___-999",
+    replacement: { _: /[a-zA-Z]/, 9: /\d/ },
+    track: track,
+  });
+
+  const [pdf, setPdf] = useState<Blob | null>(null);
+  // const [numPages, setNumPages] = useState(null);
+  // const [pageNumber, setPageNumber] = useState(1);
+  // const [url, setUrl] = useState<null| string>(null);
+
+  // const onDocumentLoadSuccess = ({ numPages }: { numPages: any }) => {
+  //   setNumPages(numPages);
+  // };
+  const onDownloadPdf = useCallback(() => {
+    if (!pdf) return;
+    const url = window.URL.createObjectURL(new Blob([pdf]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "replicated_document.pdf"); // Filename
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }, [pdf]);
+
+  const onViewPdf = useCallback(() => {
+    if (!pdf) return;
+    const url = URL.createObjectURL(
+      new Blob([pdf], { type: "application/pdf" })
+    );
+    window.open(url, "_blank");
+    // setUrl(url);
+  }, [pdf]);
+
+  const formik = useFormik({
+    initialValues,
+    validationSchema: Yup.object({
+      placas: Yup.array()
+        .of(
+          Yup.object({
+            title: Yup.string(),
+          })
+        )
+        .min(1, "Debe agregar al menos una placa"),
+      fechaInicial: Yup.date().required("Debe seleccionar una fecha inicial"),
+      fechaFinal: Yup.date().required("Debe seleccionar una fecha final"),
+    }),
+    onSubmit: async (values, { setSubmitting }) => {
+      const placas = values.placas.map((placa) =>
+        placa.inputValue?.replace("-", "")
+      );
+      const fechaInicial = values.fechaInicial?.format("YYYY-MM-DD") || "";
+      const fechaFinal = values.fechaFinal?.format("YYYY-MM-DD") || "";
+      const queryParams = new URLSearchParams({
+        placas: placas.join(","),
+        fechaInicial,
+        fechaFinal,
+      }).toString();
+      setSubmitting(true);
+
+      try {
+        const response = await suliquidoApi.get(
+          `/reportes/generar-estado-cuenta/?${queryParams}`,
+          { responseType: "blob" }
+        );
+        setPdf(response.data);
+      } catch (error: any) {
+        if (error.status === 404) {
+          console.log("No se encontrarón manifiiestos");
+        }
+      }
+
+      setSubmitting(false);
+    },
+  });
+
+  useEffect(() => {
+    setPdf(null);
+  }, [formik.values]);
 
   return (
-    <FletesLayout>
+    <FletesLayout minHeight="105vh">
       <Grid2
         gap={3}
         container
@@ -37,26 +142,27 @@ export const GenerarEstadoCuenta: FC = () => {
           manifiesto por propietario
         </Typography>
 
-        <form>
+        <form noValidate onSubmit={formik.handleSubmit}>
           <Autocomplete
             multiple
-            value={value}
-            options={[]}
-            onChange={(_, newValue) => {
-              setValue(newValue);
+            value={formik.values.placas}
+            options={[]} // Add your options here
+            onChange={async (_, newValue) => {
+              await formik.setFieldValue("placas", newValue);
+              await formik.setFieldTouched("placas", true);
             }}
             filterOptions={(options, params) => {
               const filtered = filter(options, params);
 
               const { inputValue } = params;
-              // Suggest the creation of a new value
               const isExisting = options.some(
                 (option) => inputValue === option.title
               );
               if (inputValue !== "" && !isExisting) {
+                if (inputValue.length < 7) return [];
                 filtered.push({
                   inputValue,
-                  title: `Add "${inputValue}"`,
+                  title: `Agrega "${inputValue}"`,
                 });
               }
 
@@ -67,15 +173,12 @@ export const GenerarEstadoCuenta: FC = () => {
             handleHomeEndKeys
             id="free-solo-with-text-demo"
             getOptionLabel={(option) => {
-              // Value selected with enter, right from the input
               if (typeof option === "string") {
                 return option;
               }
-              // Add "xxx" option created dynamically
               if (option.inputValue) {
                 return option.inputValue;
               }
-              // Regular option
               return option.title;
             }}
             renderOption={(props, option) => {
@@ -88,43 +191,132 @@ export const GenerarEstadoCuenta: FC = () => {
             }}
             renderInput={(params) => (
               <TextField
-                error
-                helperText="Seleccione un propietario"
                 {...params}
-                label="xd"
-                placeholder="XXX-XXX"
+                inputRef={inputRef}
+                label="Digite los números de placa de los vehículos"
+                placeholder="ABC-123"
+                error={!!formik.errors.placas && (formik.touched.placas as any)}
+                helperText={
+                  !!formik.errors.placas && (formik.touched.placas as any)
+                    ? (formik.errors.placas as string)
+                    : ""
+                }
               />
             )}
           />
 
-          <DatePicker sx={{ width: "100%" }} label="FECHA INICIAL" />
-          <DatePicker sx={{ width: "100%" }} label="FECHA FINAL" />
-        </form>
-        <Divider orientation="horizontal" flexItem />
+          <DatePicker
+            name="fechaInicial"
+            label="FECHA INICIAL"
+            value={formik.values.fechaInicial}
+            slotProps={{
+              field: {
+                clearable: true,
+              },
+              textField: {
+                fullWidth: true,
+                name: "fechaInicial",
+                margin: "normal",
+                error:
+                  !!formik.errors.fechaInicial && formik.touched.fechaInicial,
+                helperText:
+                  !!formik.errors.fechaInicial && formik.touched.fechaInicial
+                    ? (formik.errors.fechaInicial as string)
+                    : "",
+              },
+            }}
+            onChange={async (value) => {
+              await formik.setFieldValue("fechaInicial", value);
+              await formik.setFieldTouched("fechaInicial", true);
+            }}
+          />
 
-        {isLoading && <Button variant="contained">GENERAR</Button>}
+          <DatePicker
+            name="fechaFinal"
+            label="FECHA FINAL"
+            value={formik.values.fechaFinal}
+            slotProps={{
+              field: {
+                clearable: true,
+              },
+              textField: {
+                fullWidth: true,
+                name: "fechaFinal",
+                margin: "normal",
+                error: !!formik.errors.fechaFinal && formik.touched.fechaFinal,
+                helperText:
+                  !!formik.errors.fechaFinal && formik.touched.fechaFinal
+                    ? (formik.errors.fechaFinal as string)
+                    : "",
+              },
+            }}
+            onChange={async (value) => {
+              await formik.setFieldValue("fechaFinal", value);
+              await formik.setFieldTouched("fechaFinal", true);
+            }}
+          />
 
-        <Typography mt={3} textAlign="left" variant="subtitle2">
-          Documento generado
-        </Typography>
-        <Box
-          gap={1}
-          justifyContent="left"
-          display="flex"
-          flexDirection="row"
-          alignItems="center"
-        >
-          <Button startIcon={<Visibility />} variant="outlined">
-            VER
-          </Button>
           <Button
-            startIcon={<Download />}
-            sx={{ backgroundColor: green[500] }}
+            sx={{ mt: 2 }}
+            disabled={formik.isSubmitting}
+            fullWidth
+            type="submit"
             variant="contained"
+            color="primary"
           >
-            DESCARGAR
+            Generar Informe
           </Button>
-        </Box>
+        </form>
+
+        <Divider orientation="horizontal" flexItem />
+        {/* 
+        {isLoading && <Button variant="contained">GENERAR</Button>} */}
+        {formik.isSubmitting && (
+          <Box
+            alignItems="center"
+            justifyContent="center"
+            sx={{ display: "flex" }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
+
+        {pdf && (
+          <>
+            <Typography mt={1} textAlign="left" variant="subtitle2">
+              Documento generado
+            </Typography>
+            <Box
+              gap={1}
+              justifyContent="left"
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+            >
+              <Button
+                onClick={onViewPdf}
+                startIcon={<Visibility />}
+                variant="outlined"
+              >
+                VER
+              </Button>
+              <Button
+                onClick={onDownloadPdf}
+                startIcon={<Download />}
+                sx={{ backgroundColor: green[500] }}
+                variant="contained"
+              >
+                DESCARGAR
+              </Button>
+            </Box>
+          </>
+        )}
+
+        {/* {url && (
+          <Document className="document" file={url}  onLoadSuccess={onDocumentLoadSuccess}>
+            <Page className="page" pageNumber={pageNumber}  />
+          </Document>
+        )} */}
       </Grid2>
     </FletesLayout>
   );

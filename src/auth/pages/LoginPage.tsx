@@ -4,28 +4,41 @@ import {
   Box,
   TextField,
   Typography,
+  Snackbar,
+  Alert,
+  SnackbarCloseReason,
 } from "@mui/material";
 import { AuthLayout } from "../layout/AuthLayout";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { blue, grey } from "@mui/material/colors";
 import { Formik } from "formik";
 import { useAuthStore } from "../../hooks/useAuthStore";
 import { LoginAuthCredentials } from "../../interfaces/auth.interface";
 
-
-const initialValues : LoginAuthCredentials = {
-  cedula: "",
+const initialValues: LoginAuthCredentials = {
+  documentNumber: "",
   password: "",
-}
+};
 
 export const LoginPage: FC = () => {
-
-  const {startLogin} = useAuthStore();
+  const { startLogin, startClearErrorMessages, status, errorMessage } =
+    useAuthStore();
 
   const onSubmit = (values: LoginAuthCredentials) => {
-    startLogin({uid:'', cedula: values.cedula, name:'', email:'', role:'',});
+    startLogin(values);
   };
 
+  const isChecking = useMemo(() => status === "checking", [status]);
+
+  const handleClose = (
+    _: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    startClearErrorMessages();
+  };
 
   return (
     <AuthLayout>
@@ -36,22 +49,27 @@ export const LoginPage: FC = () => {
            */}
           <Formik
             initialValues={initialValues}
-            onSubmit={(values: LoginAuthCredentials, { setSubmitting }) => {
+            validate={(values) => {
+              const errors: Partial<LoginAuthCredentials> = {};
+              if (!values.documentNumber) {
+                errors.documentNumber = "Campo requerido";
+              }
+              if (!values.password) {
+                errors.password = "Campo requerido";
+              }
+              return errors;
+            }}
+            onSubmit={(values: LoginAuthCredentials) => {
               onSubmit(values);
-              console.log(values);
-              setTimeout(() => {
-                setSubmitting(false);
-              }, 200);
             }}
           >
             {({
               values,
-              // errors,
-              // touched,
+              errors,
+              touched,
               handleChange,
               handleBlur,
               handleSubmit,
-              isSubmitting,
               /* and other goodies */
             }) => (
               <form noValidate onSubmit={handleSubmit}>
@@ -61,8 +79,12 @@ export const LoginPage: FC = () => {
                   variant="outlined"
                   margin="normal"
                   fullWidth
-                  name="cedula"
-                  value={values.cedula}
+                  name="documentNumber"
+                  error={!!errors.documentNumber && touched.documentNumber}
+                  helperText={
+                    touched.documentNumber ? errors.documentNumber : ""
+                  }
+                  value={values.documentNumber}
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
@@ -75,18 +97,19 @@ export const LoginPage: FC = () => {
                   fullWidth
                   name="password"
                   value={values.password}
+                  error={!!errors.password && touched.password}
+                  helperText={touched.password ? errors.password : ""}
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
 
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isChecking}
                   variant="contained"
                   color="primary"
                   size="large"
-                  // onClick={handleLogin}
-                  sx={{ mt: 3, width: "100%" }}
+                  sx={{ mt: 1, width: "100%" }}
                 >
                   Ingresar al sistema
                 </Button>
@@ -125,6 +148,20 @@ export const LoginPage: FC = () => {
             2025 - Todos los derechos reservados - SULIQUIDO SLQ SAS
           </Typography>
         </Box>
+        <Snackbar
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          open={!!errorMessage}
+          onClose={handleClose}
+        >
+          <Alert
+            onClose={handleClose}
+            severity="error"
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {errorMessage}
+          </Alert>
+        </Snackbar>
       </Container>
     </AuthLayout>
   );

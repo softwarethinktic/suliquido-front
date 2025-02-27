@@ -5,6 +5,7 @@ import "../styles/index.css";
 import { grey } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
 import { useCallback } from "react";
+import { useAuthStore } from "../../hooks/useAuthStore";
 
 const ButtonStyled = styled(Button)<ButtonProps>(({ theme }) => ({
   color: theme.palette.getContrastText(grey[50]),
@@ -19,6 +20,7 @@ const ButtonStyled = styled(Button)<ButtonProps>(({ theme }) => ({
 export const HomePage = () => {
   const navigate = useNavigate();
 
+  const { user } = useAuthStore();
   const goToLiquidacion = useCallback(() => {
     navigate("/home/liquidacion");
   }, []);
@@ -45,7 +47,7 @@ export const HomePage = () => {
         alignItems="center"
       >
         <Typography variant="h6" gutterBottom>
-          Cordial saludo, <strong>Nombre</strong>
+          Cordial saludo, <strong>{user?.name.split(" ")[0]}</strong>
         </Typography>
         <Typography variant="body1" gutterBottom color={grey[600]}>
           ¿Qué desea hacer hoy?

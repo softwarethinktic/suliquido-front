@@ -5,6 +5,7 @@ import { UserAuth } from "../interfaces/auth.interface";
 
 export interface StoreState {
   auth: AuthState;
+  fletes: any
 }
 
 export interface AuthState {

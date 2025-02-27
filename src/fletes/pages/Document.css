@@ -1,0 +1,13 @@
+.page {
+  flex-direction: "column";
+  background-color: "#E4E4E4";
+}
+
+.document {
+  position: absolute;
+  top: 3%;
+  left: 15.5%;
+  height: 800px !important;
+  width: 60vh  !important;
+  z-index: 5;
+}

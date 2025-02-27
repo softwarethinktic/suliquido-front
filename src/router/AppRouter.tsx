@@ -4,14 +4,20 @@ import { FletesRoutes } from "../fletes/routes/FletesRoutes";
 import { useAuthStore } from "../hooks/useAuthStore";
 import { CheckingAuth } from "../auth/components/CheckingAuth";
 import { AdminRoutes } from "../admin/routes/AdminRoutes";
+import { useEffect } from "react";
 
 export const AppRouter = () => {
-  const { status, user } = useAuthStore();
+  const { status, user, checkAuthToken } = useAuthStore();
 
-  // if( status === 'checking' ) {
+  useEffect(() => {
+    checkAuthToken();
+  
+  }, [])
 
-  //   return  <CheckingAuth />
-  // }
+  if( status === 'checking' ) {
+
+    return  <CheckingAuth />
+  }
 
   return (
     <Routes>

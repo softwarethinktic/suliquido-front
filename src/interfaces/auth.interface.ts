@@ -1,13 +1,13 @@
 
 
 export interface LoginAuthCredentials {
-    cedula: string;
+    documentNumber: string;
     password: string;
 }
 
 export interface UserAuth {
-    uid: string;
-    cedula: string;
+    id: string;
+    documentNumber: string;
     name: string;
     email: string;
     role?: string;

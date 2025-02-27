@@ -1,5 +1,5 @@
-import { AccountCircle, LogoutOutlined } from "@mui/icons-material";
-import { Box, Divider, Grid2, IconButton, Typography } from "@mui/material";
+import {  LogoutOutlined } from "@mui/icons-material";
+import { Box, Divider, Grid2, IconButton } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { ElementType, ReactNode, useCallback } from "react";
 import Breadcrumbs from "../components/Breadcrumbs";
@@ -69,12 +69,12 @@ export const FletesLayout = ({ children, minHeight = "100vh" }: Props) => {
           />
 
           <Box display="flex" flexDirection="row" alignItems="center">
-            <IconButton>
+            {/* <IconButton>
               <AccountCircle />
             </IconButton>
             <Typography sx={{ marginBottom: 0 }} variant="body2" gutterBottom>
               Usuario
-            </Typography>
+            </Typography> */}
             <IconButton onClick={startLogout} color="error">
               <LogoutOutlined />
             </IconButton>

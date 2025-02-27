@@ -1,37 +1,27 @@
 import { Download, Email } from "@mui/icons-material";
 import { IconButton, Stack } from "@mui/material";
 import Box from "@mui/material/Box";
-import {
-  DataGrid,
-  GridColDef,
-  GridRenderCellParams,
-  // GridToolbar,
-} from "@mui/x-data-grid";
-import { BaseSyntheticEvent } from "react";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { BaseSyntheticEvent, useEffect, useState } from "react";
+import { Manifiesto, ManifiestoPaged } from "../../interfaces/fletes.interface";
+import suliquidoApi from "../../api/suliquidoApi";
+import { useGetFletesQuery } from "../../api/fletesApi";
 const VISIBLE_FIELDS: GridColDef[] = [
   {
-    field: "rowNumber",
-    headerAlign: "center",
-    align: "center",
-    headerName: "#",
-    minWidth: 80,
-    flex: 1,
-    valueGetter: (_, row, __, api) =>
-      `${api.current.getRowIndexRelativeToVisibleRows(row.id) + 1}`,
-  },
-  {
-    field: "tonValue",
+    field: "valorTons",
     headerAlign: "center",
     align: "center",
     headerName: "Vlr.TONS",
     minWidth: 150,
+    valueFormatter: (params) => currencyFormat(params as number),
     flex: 1,
   },
   {
-    field: "fleteValue",
+    field: "valorFlete",
     headerAlign: "center",
     align: "center",
     headerName: "Vlr.Flete",
+    valueFormatter: (params) => currencyFormat(params as number),
     minWidth: 140,
     flex: 1,
   },
@@ -40,11 +30,10 @@ const VISIBLE_FIELDS: GridColDef[] = [
     headerAlign: "center",
     align: "center",
     headerName: "Anticipos",
+    valueFormatter: (params) => currencyFormat(params as number),
     minWidth: 130,
     flex: 1,
   },
-  // { field: "year", minWidth: 130, flex: 1 },
-  // { field: "cinematicUniverse", minWidth: 120, flex: 1 },
   {
     field: "action",
     align: "center",
@@ -58,8 +47,20 @@ const VISIBLE_FIELDS: GridColDef[] = [
     renderCell: (params: GridRenderCellParams) => {
       const onClick = (e: BaseSyntheticEvent) => {
         e.stopPropagation();
-        const currentRow = params.row;
-        return alert(JSON.stringify(currentRow, null, 4));
+        const currentRow = params.row as Manifiesto;
+        suliquidoApi
+          .get(`/reportes/generar-liquidacion/${currentRow.id}`, {
+            responseType: "blob",
+          })
+          .then((response) => {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "replicated_document.pdf"); // Filename
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          });
       };
 
       return (
@@ -71,28 +72,12 @@ const VISIBLE_FIELDS: GridColDef[] = [
           justifyContent="center"
           spacing={2}
         >
-          <IconButton>
+          <IconButton onClick={onClick}>
             <Download />
           </IconButton>
-          <IconButton>
+          <IconButton onClick={onClick}>
             <Email />
           </IconButton>
-          {/* <Button
-            variant="outlined"
-            color="warning"
-            size="small"
-            onClick={onClick}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            size="small"
-            onClick={onClick}
-          >
-            Delete
-          </Button> */}
         </Stack>
       );
     },
@@ -103,42 +88,81 @@ function currencyFormat(num: number) {
   return "$" + num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
 }
 
-const FletesTable = () => {
-  //   const data = useMovieData();
-  const data = {
-    rows: [
-      {
-        id: 1,
-        tonValue: currencyFormat(10),
-        fleteValue: currencyFormat(100),
-        anticipos: currencyFormat(20),
-      },
-      {
-        id: 2,
-        tonValue: currencyFormat(20),
-        fleteValue: currencyFormat(200),
-        anticipos: currencyFormat(40),
-      },
-      {
-        id: 3,
-        tonValue: currencyFormat(30),
-        fleteValue: currencyFormat(300),
-        anticipos: currencyFormat(60),
-      },
-    ],
+interface FletesTableProps {
+  data: ManifiestoPaged | null;
+  isUninitialized: boolean;
+  isFetching: boolean;
+  fletesValues: {
+    numeroManifiesto: string;
+    placa: string;
+    fecha: string;
+    productName: string;
   };
+}
 
-  // Otherwise filter will be applied on fields such as the hidden column id
-  //   const columns = React.useMemo(
-  //     () => data.columns.filter((column) => VISIBLE_FIELDS.includes(column.field)),
-  //     [data.columns],
-  //   );
+const FletesTable = (props: FletesTableProps) => {
+  const [pageState, setPageState] = useState({
+    data: props.data?.manifiestos || [],
+    total: props.data?.totalItems || 0,
+    page: props.data?.currentPage || 0,
+    totalPages: props.data?.totalPages || 0,
+    pageSize: props.data?.pageSize || 5,
+  });
+
+  const { isFetching, data } = useGetFletesQuery(
+    {
+      ...props.fletesValues,
+      page: pageState.page,
+      size: pageState.pageSize,
+    },
+    {
+      skip: props.isUninitialized,
+    }
+  );
+
+  useEffect(() => {
+    if (!data) return;
+    setPageState({
+      ...pageState,
+      data: data.response?.manifiestos || [],
+      total: data.response?.totalItems || 0,
+      page: data.response?.currentPage || 0,
+      totalPages: data.response?.totalPages || 0,
+    });
+  }, [data]);
+
+
+  useEffect(() => {
+
+    setPageState({
+      ...pageState,
+      data: props.data?.manifiestos || [],
+      total: props.data?.totalItems || 0,
+      page: props.data?.currentPage || 0,
+      totalPages: props.data?.totalPages || 0,
+      pageSize: props.data?.pageSize || 5,
+    });
+
+  }, [props.data]);
 
   return (
     <Box sx={{ height: "auto", width: 1 }}>
       <DataGrid
-        {...data}
-        isRowSelectable={() =>false}
+        rows={pageState.data}
+        rowCount={pageState.total}
+        loading={props.isFetching || isFetching}
+        pagination
+        pageSizeOptions={[5, 10, 15]} // Set the available page size options
+        paginationModel={{
+          pageSize: pageState.pageSize,
+          page: pageState.page,
+        }}
+        paginationMode="server"
+        onPaginationModelChange={(values) => {
+          // trigger();
+          setPageState({ ...pageState, ...values });
+        }}
+        isRowSelectable={() => false}
         localeText={{
           noRowsLabel: "No se ha encontrado datos.",
           noResultsOverlayLabel: "No se ha encontrado ningún resultado",

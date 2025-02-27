@@ -22,8 +22,8 @@ export const AuthLayout = ({ children }: Props) => {
         className="box-shadow"
         xs={3}
         sx={{
-          width: { sm: 450, xs: "100%" },
-          height: {xs: '100vh', sm: 'auto'},
+          width: { sm: '50vw', xs: "100%" },
+          height: {xs: '100vh', sm: '70vh'},
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
