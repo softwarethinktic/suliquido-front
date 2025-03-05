@@ -1,5 +1,6 @@
 name: 🚀 Deploy website on push
 
+
 on:
   push:
     branches:
@@ -9,7 +10,8 @@ jobs:
   web-deploy:
     name: 🚀 Deploy
     runs-on: ubuntu-latest
-
+    env:
+      VITE_API_URL: ${{ secrets.VITE_API_URL }}
     steps:
       - name: 🛎 Get latest code
         uses: actions/checkout@v3
