@@ -129,7 +129,7 @@ export const GenerarEstadoCuenta: FC = () => {
   }, [formik.values]);
 
   return (
-    <FletesLayout minHeight="105vh">
+    <FletesLayout minHeight="110vh">
       <Grid2
         gap={3}
         container

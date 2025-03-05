@@ -54,7 +54,7 @@ export const LiquidacionFlete: FC = () => {
       fecha: values.fecha?.format("YYYY-MM-DD") || ("" as string),
       productName: values.productName,
       page: 0,
-      size: 5
+      size: 5,
     },
     {
       skip: isFormEmpty,
@@ -156,10 +156,9 @@ export const LiquidacionFlete: FC = () => {
                 name="fecha"
                 label="FECHA"
                 value={values.fecha}
-
                 slotProps={{
-                  actionBar:{
-                    actions: ['clear','cancel', 'accept']
+                  actionBar: {
+                    actions: ["clear", "cancel", "accept"],
                   },
                   field: {
                     clearable: true,
