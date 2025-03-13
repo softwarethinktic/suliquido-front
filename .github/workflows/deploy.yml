@@ -1,6 +1,5 @@
 name: 🚀 Deploy website on push
 
-
 on:
   push:
     branches:
@@ -12,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VITE_API_URL: ${{ secrets.VITE_API_URL }}
+      VITE_MODE: ${{ secrets.VITE_MODE }}
     steps:
       - name: 🛎 Get latest code
         uses: actions/checkout@v3
@@ -19,7 +19,7 @@ jobs:
       - name: Use Node.js 22
         uses: actions/setup-node@v2
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: 📦 Build Project
         run: |

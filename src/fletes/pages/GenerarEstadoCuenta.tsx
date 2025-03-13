@@ -22,6 +22,7 @@ import * as Yup from "yup";
 
 import { Value } from "../../interfaces/fletes.interface";
 import suliquidoApi from "../../api/suliquidoApi";
+import { useAuthStore } from "../../hooks/useAuthStore";
 // import "./Document.css";
 // import "react-pdf/dist/Page/AnnotationLayer.css";
 // import "react-pdf/dist/Page/TextLayer.css";
@@ -54,6 +55,7 @@ export const GenerarEstadoCuenta: FC = () => {
     track: track,
   });
 
+  const { user } = useAuthStore();
   const [pdf, setPdf] = useState<Blob | null>(null);
   // const [numPages, setNumPages] = useState(null);
   // const [pageNumber, setPageNumber] = useState(1);
@@ -67,7 +69,7 @@ export const GenerarEstadoCuenta: FC = () => {
     const url = window.URL.createObjectURL(new Blob([pdf]));
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "replicated_document.pdf"); // Filename
+    link.setAttribute("download", `ESTADO DE CUENTA ${user?.name}.pdf`); // Filename
     document.body.appendChild(link);
     link.click();
     link.remove();
