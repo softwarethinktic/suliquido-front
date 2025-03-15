@@ -1,13 +1,21 @@
 import { Grid2 } from "@mui/material";
 import { grey } from "@mui/material/colors";
-import { ElementType, ReactNode } from "react";
+import { ElementType, ReactNode, useCallback } from "react";
 import "../styles/index.css";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   children: ReactNode;
 }
 
 export const AuthLayout = ({ children }: Props) => {
+  
+  const navigate = useNavigate();
+  
+
+  const goToLogin = useCallback(() => {
+    navigate("/login");
+  }, []);
   return (
     <Grid2
       container
@@ -34,6 +42,7 @@ export const AuthLayout = ({ children }: Props) => {
         }}
       >
           <img
+            onClick={goToLogin}
             className="logo"
             src="https://suliquido.thinktic.co/wp-content/uploads/2024/01/logo-SU-LIQUIDO-SAS-1-e1708029386257.png"
             alt=""

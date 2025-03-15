@@ -10,6 +10,8 @@ export interface StoreState {
 
 export interface AuthState {
   status?: "checking" | "authenticated" | "not-authenticated";
+  isOTPvalid?: boolean;
+  isLoading?: boolean;
   user?: UserAuth;
   errorMessage?: string;
 }

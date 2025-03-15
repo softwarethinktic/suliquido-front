@@ -30,10 +30,10 @@ const initialValues: RegisterFormValues = {
 const validationSchema = Yup.object({
   documentNumber: Yup.string().required("El número de documento es requerido"),
   email: Yup.string().email("Email inválido").required("El email es requerido"),
-  password: Yup.string()
-    .min(6, "La contraseña debe tener al menos 6 caracteres")
-    .required("La contraseña es requerida"),
-  name: Yup.string().required("El nombre es requerido").trim(),
+  // password: Yup.string()
+  //   .min(6, "La contraseña debe tener al menos 6 caracteres")
+  //   .required("La contraseña es requerida"),
+  // name: Yup.string().required("El nombre es requerido").trim(),
 });
 
 export const RegisterPage: FC = () => {
@@ -49,11 +49,11 @@ export const RegisterPage: FC = () => {
 
   const onSubmit = async (values: RegisterFormValues) => {
     try {
-      const response = await suliquidoApi.post("/auth/register", values);
+      const response = await suliquidoApi.post("/otp/send-register-link", values);
       if (response.data.ok) {
         setSnackbarOpen(true);
         setSnackbarSeverity("success");
-        setMessageSnackbar("El usuario ha sido registrado exitosamente");
+        setMessageSnackbar(response.data.msg);
       }
     } catch (error: any) {
       setSnackbarOpen(true);
@@ -117,33 +117,6 @@ export const RegisterPage: FC = () => {
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
-                <TextField
-                  placeholder="Ingrese su contraseña"
-                  label="Contraseña"
-                  type="password"
-                  variant="outlined"
-                  margin="normal"
-                  fullWidth
-                  name="password"
-                  error={!!errors.password && touched.password}
-                  helperText={touched.password ? errors.password : ""}
-                  value={values.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-                <TextField
-                  placeholder="Ingrese su nombre"
-                  label="Nombre"
-                  variant="outlined"
-                  margin="normal"
-                  fullWidth
-                  name="name"
-                  error={!!errors.name && touched.name}
-                  helperText={touched.name ? errors.name : ""}
-                  value={values.name}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
                 <Button
                   disabled={isSubmitting}
                   type="submit"
@@ -152,7 +125,7 @@ export const RegisterPage: FC = () => {
                   size="large"
                   sx={{ mt: 1, width: "100%" }}
                 >
-                  Registrar
+                  Enviar link de registro
                 </Button>
               </form>
             )}

@@ -2,7 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AuthState } from "../../hooks/hooks";
 
 const initialState: AuthState = {
+  isOTPvalid: false,
   status: "checking", // 'checking' | 'authenticated' | 'not-authenticated'
+  isLoading: false,
 };
 
 export const authSlice = createSlice({
@@ -13,6 +15,13 @@ export const authSlice = createSlice({
       state.status = "checking";
       state.user = undefined;
       state.errorMessage = undefined;
+    },
+    onLoading: (state /* action */) => {
+      state.isLoading = true;
+    },
+    onValidateOTP: (state, { payload }: { payload: boolean }) => {
+      state.isOTPvalid = payload;
+      state.isLoading = false;
     },
     onLogin: (state, { payload }: { payload: AuthState }) => {
       state.status = "authenticated";
@@ -31,5 +40,11 @@ export const authSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { onChecking, onLogin, onLogout, clearErrorMessages } =
-  authSlice.actions;
+export const {
+  onChecking,
+  onLoading,
+  onValidateOTP,
+  onLogin,
+  onLogout,
+  clearErrorMessages,
+} = authSlice.actions;

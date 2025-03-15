@@ -5,13 +5,17 @@ import { LoginAuthCredentials, UserAuth } from "../interfaces/auth.interface";
 import {
   clearErrorMessages,
   onChecking,
+  onLoading,
   onLogin,
   onLogout /*onLogoutCalendar*/,
+  onValidateOTP,
 } from "../store/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "./hooks";
 
 export const useAuthStore = () => {
-  const { status, user, errorMessage } = useAppSelector((state) => state.auth);
+  const { status, user, errorMessage, isOTPvalid, isLoading } = useAppSelector(
+    (state) => state.auth
+  );
   const dispatch = useAppDispatch();
 
   const startLogin = async (userCredentials: LoginAuthCredentials) => {
@@ -31,24 +35,55 @@ export const useAuthStore = () => {
     }
   };
 
-  // const startRegister = async ({name,email,password}) => {
+  const startRegister = async ({
+    name,
+    password,
+    otpCode,
+  }: {
+    name: string;
+    password: string;
+    otpCode: string;
+  }) => {
+    dispatch(onChecking());
 
-  //     dispatch(onChecking());
+    try {
+      const { data } = await suliquidoApi.post(
+        "/auth/register",
+        {
+          name,
+          password,
+        },
+        {
+          headers: {
+            "otp-code": otpCode, // OTP code
+          },
+        }
+      );
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("token-init-date", new Date().getTime().toString());
 
-  //     try {
-  //         // const {data} = await calendarApi.post('/auth/new', {name, email, password});
-  //         // localStorage.setItem('token', data.token);
-  //         // localStorage.setItem('token-init-date', new Date().getTime());
-
-  //         dispatch( onLogin({name: data.name, uid: data.uid}) );
-  //     }
-  //     catch (error) {
-  //         dispatch( onLogout( error.response.data?.msg || '' ) );
-  //         setTimeout(()=>{
-  //             dispatch( clearErrorMessages() );
-  //         },10);
-  //     }
-  // }
+      dispatch(onLogin({ user: data.user }));
+    } catch (error: any) {
+      dispatch(onLogout({errorMessage: error.response.data?.msg || ""}));
+    }
+  };
+  const checkOTPcode = async (otp: string) => {
+    if (otp.length === 0 || !otp) {
+      dispatch(onValidateOTP(false));
+      return;
+    }
+    dispatch(onLoading());
+    try {
+      const { data } = await suliquidoApi.get("/otp/validate", {
+        headers: {
+          "otp-code": otp,
+        },
+      });
+      dispatch(onValidateOTP(data.ok));
+    } catch (error: any) {
+      dispatch(onValidateOTP(false));
+    }
+  };
 
   const checkAuthToken = async () => {
     const token = localStorage.getItem("token");
@@ -80,13 +115,17 @@ export const useAuthStore = () => {
   return {
     // Props
     status,
+    isLoading,
+    isOTPvalid,
     user,
     errorMessage,
     // Methods
     startLogin,
+    startRegister,
     startLogout,
     startClearErrorMessages,
     // startRegister,
     checkAuthToken,
+    checkOTPcode,
   };
 };
