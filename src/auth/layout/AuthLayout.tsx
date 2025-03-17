@@ -1,14 +1,16 @@
-import { Grid2 } from "@mui/material";
+import { Grid2, SxProps } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { ElementType, ReactNode, useCallback } from "react";
 import "../styles/index.css";
 import { useNavigate } from "react-router-dom";
+import { Theme } from "@emotion/react";
 
 interface Props {
   children: ReactNode;
+  sx?: SxProps<Theme>
 }
 
-export const AuthLayout = ({ children }: Props) => {
+export const AuthLayout = ({ children, sx }: Props) => {
   
   const navigate = useNavigate();
   
@@ -23,7 +25,7 @@ export const AuthLayout = ({ children }: Props) => {
       direction="column"
       alignItems="center"
       justifyContent="center"
-      sx={{ minHeight: "100vh", backgroundColor: grey[100], padding: {sm: 4,xs: 0} }}
+      sx={{ minHeight: "100vh", backgroundColor: grey[100], padding: {sm: 4,xs: 0}}}
     >
       <Grid2
         component={"div" as ElementType}
@@ -39,6 +41,7 @@ export const AuthLayout = ({ children }: Props) => {
           backgroundColor: "white",
           padding: 3,
           borderRadius: 2,
+          ...sx
         }}
       >
           <img

@@ -78,7 +78,7 @@ export default function RegisterPage() {
 
   if (isOTPvalid) {
     return (
-      <AuthLayout>
+      <AuthLayout sx={{ justifyContent: "start" }}>
         <Container maxWidth="sm">
           <Box
             display="flex"
@@ -88,7 +88,7 @@ export default function RegisterPage() {
             mt={5}
           >
             <Typography variant="h4" gutterBottom>
-              Registrar Nuevo Usuario
+              Registrar nuevo usuario
             </Typography>
 
             <Typography textAlign="justify" variant="body2" gutterBottom>

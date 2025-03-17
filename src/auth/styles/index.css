@@ -6,4 +6,21 @@
     width: 300px;
     margin: 0 auto;
     display: block;
+    cursor: pointer;
+    user-select: none;
+}
+
+.link{
+    color: #2196f3;
+    text-decoration: none;
+    font-weight: 700;
+    user-select: none;
+    cursor: pointer;
+    font-family: "Roboto","Helvetica","Arial",sans-serif;
+    margin-bottom: 40px;
+    margin-top: 40px;
+
+    &:hover{
+        color: #1565c0;
+    }
 }

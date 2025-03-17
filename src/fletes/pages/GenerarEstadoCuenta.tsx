@@ -16,7 +16,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Download, Visibility } from "@mui/icons-material";
 import { Track, useMask } from "@react-input/mask";
 import { useFormik } from "formik";
-import { Moment } from "moment";
+import moment, { Moment } from "moment";
 import * as Yup from "yup";
 // import { Document, Page, pdfjs } from "react-pdf";
 
@@ -87,13 +87,15 @@ export const GenerarEstadoCuenta: FC = () => {
   const formik = useFormik({
     initialValues,
     validationSchema: Yup.object({
-      placas: Yup.array()
-        .of(
-          Yup.object({
-            title: Yup.string(),
-          })
-        )
-        .min(1, "Debe agregar al menos una placa"),
+      placas: Yup.array().of(
+        Yup.object({
+          title: Yup.string().min(
+            6,
+            "El título debe tener al menos 6 caracteres"
+          ),
+        })
+      ),
+      // .min(1, "Debe agregar al menos una placa"),
       fechaInicial: Yup.date().required("Debe seleccionar una fecha inicial"),
       fechaFinal: Yup.date().required("Debe seleccionar una fecha final"),
     }),
@@ -236,6 +238,7 @@ export const GenerarEstadoCuenta: FC = () => {
           <DatePicker
             name="fechaFinal"
             label="FECHA FINAL"
+            maxDate={moment()}
             value={formik.values.fechaFinal}
             slotProps={{
               field: {

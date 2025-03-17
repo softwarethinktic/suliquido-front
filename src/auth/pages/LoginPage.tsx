@@ -10,10 +10,12 @@ import {
 } from "@mui/material";
 import { AuthLayout } from "../layout/AuthLayout";
 import { FC, useMemo } from "react";
-import { blue, grey } from "@mui/material/colors";
+import {  grey } from "@mui/material/colors";
 import { Formik } from "formik";
 import { useAuthStore } from "../../hooks/useAuthStore";
 import { LoginAuthCredentials } from "../../interfaces/auth.interface";
+import { Link } from "react-router-dom";
+import "../styles/index.css";
 
 const initialValues: LoginAuthCredentials = {
   documentNumber: "",
@@ -116,7 +118,7 @@ export const LoginPage: FC = () => {
               </form>
             )}
           </Formik>
-          <Typography
+          {/* <Typography
             sx={{
               my: 5,
               fontWeight: "bold",
@@ -129,7 +131,11 @@ export const LoginPage: FC = () => {
             gutterBottom
           >
             ¿Olvidó su contraseña?
-          </Typography>
+          </Typography> */}
+
+          <Link className="link" to="/auth/forgot-password">
+            ¿Olvidó su contraseña?
+          </Link>
         </Box>
         <Box display="flex" flexDirection="column" textAlign="center">
           <Typography
