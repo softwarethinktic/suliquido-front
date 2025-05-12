@@ -1,6 +1,7 @@
 import { FC, useCallback, useState, useEffect } from "react";
 import { FletesLayout } from "../layout/FletesLayout";
 import {
+  Alert,
   Autocomplete,
   Box,
   Button,
@@ -8,6 +9,7 @@ import {
   createFilterOptions,
   Divider,
   Grid2,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
@@ -57,6 +59,17 @@ export const GenerarEstadoCuenta: FC = () => {
 
   const { user } = useAuthStore();
   const [pdf, setPdf] = useState<Blob | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
+    "success"
+  );
+  const [messageSnackbar, setMessageSnackbar] = useState<string | null>(null);
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+  const [maxDate, setMaxDate] = useState(moment());
+  const [minDate, setMinDate] = useState<undefined | Moment>(undefined);
   // const [numPages, setNumPages] = useState(null);
   // const [pageNumber, setPageNumber] = useState(1);
   // const [url, setUrl] = useState<null| string>(null);
@@ -120,7 +133,10 @@ export const GenerarEstadoCuenta: FC = () => {
         setPdf(response.data);
       } catch (error: any) {
         if (error.status === 404) {
-          console.log("No se encontrarón manifiiestos");
+          console.log(error);
+          setSnackbarOpen(true);
+          setSnackbarSeverity("error");
+          setMessageSnackbar("No se encontraron manifiestos");
         }
       }
 
@@ -131,6 +147,23 @@ export const GenerarEstadoCuenta: FC = () => {
   useEffect(() => {
     setPdf(null);
   }, [formik.values]);
+
+  useEffect(() => {
+    if (formik.values.fechaInicial || formik.values.fechaFinal) {
+      const fechaInicial = moment(formik.values.fechaInicial);
+      const fechaFinal = moment(formik.values.fechaFinal);
+      setMinDate(fechaInicial);
+      if (fechaFinal.isSameOrBefore(moment())) {
+        setMaxDate(fechaFinal);
+      } else {
+        setMaxDate(moment());
+      }
+      if (fechaInicial.isAfter(fechaFinal)) {
+        formik.setFieldValue("fechaFinal", null);
+        formik.setFieldValue("fechaInicial", null);
+      }
+    }
+  }, [formik.values.fechaInicial, formik.values.fechaFinal]);
 
   return (
     <FletesLayout minHeight="110vh">
@@ -213,6 +246,7 @@ export const GenerarEstadoCuenta: FC = () => {
             name="fechaInicial"
             label="FECHA INICIAL"
             value={formik.values.fechaInicial}
+            maxDate={maxDate}
             slotProps={{
               field: {
                 clearable: true,
@@ -238,6 +272,7 @@ export const GenerarEstadoCuenta: FC = () => {
           <DatePicker
             name="fechaFinal"
             label="FECHA FINAL"
+            minDate={minDate}
             maxDate={moment()}
             value={formik.values.fechaFinal}
             slotProps={{
@@ -323,6 +358,20 @@ export const GenerarEstadoCuenta: FC = () => {
           </Document>
         )} */}
       </Grid2>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={snackbarOpen}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {messageSnackbar}
+        </Alert>
+      </Snackbar>
     </FletesLayout>
   );
 };

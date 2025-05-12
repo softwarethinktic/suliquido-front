@@ -33,6 +33,29 @@ const FletesTable = (props: FletesTableProps) => {
   const VISIBLE_FIELDS: GridColDef[] = useMemo(
     () => [
       {
+        field: "numeroManifiesto",
+        headerAlign: "center",
+        align: "center",
+        headerName: "N° Manifiesto",
+        minWidth: 150,
+        flex: 1,
+      },
+      {
+        field: "producto",
+        headerAlign: "center",
+        align: "center",
+        headerName: "Producto",
+        valueFormatter: (params) => {
+          const value = JSON.parse(params) as any;
+          if (Array.isArray(value)) {
+            return value.map((item: { nombreProducto: string }) => item.nombreProducto).join(", ");
+          }
+          return value?.nombreProducto || "";
+        },
+        minWidth: 150,
+        flex: 1,
+      },
+      {
         field: "valorTons",
         headerAlign: "center",
         align: "center",
